@@ -1,0 +1,16 @@
+{
+    "name": "i2i8/yii2-wising",
+    "type": "yii2-extension",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+	"yiisoft/yii2": "*"
+    },
+    "autoload": {
+    "psr-4": {"i2i8\\wising\\": ""}    
+    },
+    "config": {
+        "process-timeout": 600
+    }
+}
