@@ -5,10 +5,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
 use i2i8\wising\components\BaseWechat;
-/**
- * 微信企业号操作SDK
- * @package calmez\wechat\sdk
- */
+
 class CorpWechat extends BaseWechat
 {
     /**
@@ -933,7 +930,8 @@ class CorpWechat extends BaseWechat
      * @param string $appcorpSecret
      * @param string $token 手动指定access_token，非必要情况不建议用
      */
-    public function checkAuth($appid='',$appcorpSecret='',$token=''){
+    public function checkAuth($appid='',$appcorpSecret='',$token='')
+    {
         if (!$appid || !$appcorpSecret) {
             $appid = $this->appid;
             $appcorpSecret = $this->appcorpSecret;
@@ -1700,16 +1698,41 @@ class CorpWechat extends BaseWechat
      * snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且，即使在未关注的情况下，只要用户授权，也能获取其信息）
      * @return string
      */
-    public function getOauth2AuthorizeUrl($redirectUrl, $state = 'authorize', $scope = 'snsapi_base')
+//     public function getOauth2AuthorizeUrl($redirectUrl, $state = 'authorize', $scope = 'snsapi_base')
+//     {
+//         return $this->httpBuildQuery(self::WECHAT_OAUTH2_AUTHORIZE_URL, [
+//             'appid' => $this->corpId,
+//             'redirect_uri' => $redirectUrl,
+//             'response_type' => 'code',
+//             'scope' => $scope,
+//             'state' => $state,
+//         ]) . '#wechat_redirect';
+//     }
+    
+    /**@DianSingStart********************************************************************************/ 
+    /***
+     * 解释：移除了原方法数组中的scope和state以及官方文档URL中的：&scope=SCOPE&agentid=AGENTID&state=STATE
+     * 1、将URL组装好参数appid，redirect_uri，response_type，scope之后重定向到
+     * https://open.weixin.qq.com/connect/oauth2/authorize?appid=CORPID&redirect_uri=REDIRECT_URI&response_type=code#wechat_redirect
+     * 2、微信那边会访问redirect_uri/?code=CODE&state=STATE，其中这个code，我们就获取到了其中这个code的时效是5分钟，
+     * 也就是5分钟之内，这个code都可以去换取access_token ，当然这个access_token 与基础支持中的access_token（该access_token用于调用其他接口）不同，
+     * 是用来获取用户的基本信息的。
+     * 而后，自定义菜单中的跳转地址为：
+     * https://open.weixin.qq.com/connect/oauth2/authorize?appid=企业corpid&redirect_uri=跳转到的目标URL&response_type=code#wechat_redirect
+     * 而后，获取code，code不能存到数据库
+     * $code = Yii::$app->request->get('code');
+     * @see:https://www.zhihu.com/question/33594002
+     */
+    public function getOauth2AuthorizeUrl($redirectUrl)
     {
-        return $this->httpBuildQuery(self::WECHAT_OAUTH2_AUTHORIZE_URL, [
-            'appid' => $this->corpId,
-            'redirect_uri' => $redirectUrl,
-            'response_type' => 'code',
-            'scope' => $scope,
-            'state' => $state,
-        ]) . '#wechat_redirect';
+    	return $this->httpBuildQuery(self::WECHAT_OAUTH2_AUTHORIZE_URL, [
+    			'appid' => $this->corpId,
+    			'redirect_uri' => $redirectUrl,
+    			'response_type' => 'code',
+    	]) . '#wechat_redirect';
     }
+    
+    /**@DianSingEnd********************************************************************************/
 
     /**
      * 根据code获取成员信息
