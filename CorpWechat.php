@@ -1753,7 +1753,7 @@ class CorpWechat extends BaseWechat
         ];
         if (!empty($agentId)) $params['agentid'] = $agentId;
         $result = $this->httpGet(self::WECHAT_USER_IFNO_GET_PREFIX, $params);
-        return !isset($result['errcode']) ? $result : $this->dump($result);
+        return !is_null($result['errcode']) ? $result : $this->dump($result);
     }
 
     /* =================== 微信JS接口 =================== */
